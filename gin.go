@@ -257,35 +257,6 @@ func (engine *Engine) RunTLS(addr string, certFile string, keyFile string) (err 
 	return
 }
 
-// RunAutoTLS attaches the router to a http.Server and starts listening and serving HTTPS (secure) requests.
-// It obtains and refreshes certificates automatically,
-// as well as providing them to a TLS server via tls.Config.
-func (engine *Engine) RunAutoTLS(addr string, cache string, domain ...string) (err error) {
-	debugPrint("Listening and serving HTTPS on %s and host name is %s\n", addr, domain)
-	defer func() { debugPrintError(err) }()
-	m := autocert.Manager{
-		Prompt: autocert.AcceptTOS,
-	}
-
-	//your domain here
-	if len(domain) != 0 {
-		m.HostPolicy = autocert.HostWhitelist(domain...)
-	}
-
-	// folder for storing certificates
-	if cache != "" {
-		m.Cache = autocert.DirCache(cache)
-	}
-
-	s := &http.Server{
-		Addr:      addr,
-		TLSConfig: &tls.Config{GetCertificate: m.GetCertificate},
-		Handler:   engine,
-	}
-	err = s.ListenAndServeTLS("", "")
-	return
-}
-
 // RunUnix attaches the router to a http.Server and starts listening and serving HTTP requests
 // through the specified unix socket (ie. a file).
 // Note: this method will block the calling goroutine indefinitely unless an error happens.
